@@ -1,70 +1,174 @@
-# Getting Started with Create React App
+# Testing User Interfaces Lab
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Learning Goals
 
-## Available Scripts
+- Create React component following test-driven development
+- Find elements using accessible queries
+- Use Jest DOM matchers to write assertions
 
-In the project directory, you can run:
+## Introduction
 
-### `npm start`
+In this lesson, we'll be building a React component following a test-driven
+development workflow using the concepts we learned in the last lesson.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+To get started, fork this lesson and run `npm install`.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Since you'll be responsible for writing the tests, there aren't any tests
+provided with the starter code. You can check your work against the solution
+branch once you're finished.
 
-### `npm test`
+## Instructions
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+In this lesson, we'll be building a React component that represents the home
+page of a portfolio site for yourself based on this wireframe:
 
-### `npm run build`
+![Portfolio page wireframe](https://curriculum-content.s3.amazonaws.com/phase-2/react-tdd-testing-user-interfaces-lab/testing-user-interfaces-lab.png)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Our component won't have any state or props — all we're concerned about is what
+it renders to the page. Based on the wireframe, we'll need:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- A top-level heading with the text `Hi, I'm _______`
+- An image of yourself with alt text identifying the content of the image
+- A second-level heading with the text `About Me`
+- A paragraph for your biography
+- Two links, one to your GitHub page, and one to your LinkedIn page
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+We'll work on the first test together, and leave it up to you to write the rest!
 
-### `npm run eject`
+> **Note**: don't worry about styling/positioning elements on the page exactly
+> to match the wireframe just yet — our focus isn't on CSS here. You should
+> prioritize writing tests and using your component to render the correct DOM
+> elements.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+We'll be writing tests in the `src/__tests__/App.test.js` file, and using the
+`src/App.js` file for our component. Code along with this example for practice,
+then it'll be time to write your own tests!
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Let's start by our TDD process by writing a test for the top-level heading:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```js
+import { render, screen } from "@testing-library/react";
+import App from "../App";
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+test("displays a top-level heading with the text `Hi, I'm _______`", () => {
+  // Arrange
+  // Act
+  // Assert
+});
+```
 
-## Learn More
+In our test, we need a way to do the following:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Render the `<App>` component
+- Find the top-level heading
+- Assert that our element is in the document
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+We can use the `render` method to load our `<App>` component in the test:
 
-### Code Splitting
+```jsx
+test("displays a top-level heading with the text `Hi, I'm _______`", () => {
+  // Arrange
+  render(<App />);
+  // Act
+  // Assert
+});
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Next, we need to figure out a way to find the element. We could use the
+`getByText` method and just check for an element with the right text contents,
+but a better approach would be to use the `getByRole` method and use an
+accessible role to check for a [`heading`][aria heading] element:
 
-### Analyzing the Bundle Size
+```jsx
+test("displays a top-level heading with the text `Hi, I'm _______`", () => {
+  // Arrange
+  render(<App />);
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+  // Act
+  const topLevelHeading = screen.getByRole("heading", {
+    name: /hi, i'm/i,
+    exact: false,
+    level: 1,
+  });
 
-### Making a Progressive Web App
+  // Assert
+});
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Here, we're using a couple additional options with the [`byRole`][by-role]
+method:
 
-### Advanced Configuration
+- `name: /hi, i'm/i`: we're using a case-insensitive regular expression to match
+  the text "hi, i'm" in the element
+- `exact: false`: partial matches will be included
+- `level: 1`: we expect this to be a top-level `<h1>` element (not a `<h2>`,
+  `<h3>`, etc.)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Finally, we can assert that the element we found is in the document.
 
-### Deployment
+```jsx
+test("displays a top-level heading with the text `Hi, I'm _______`", () => {
+  // Arrange
+  render(<App />);
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+  // Act
+  const topLevelHeading = screen.getByRole("heading", {
+    name: /hi, i'm/i,
+    exact: false,
+    level: 1,
+  });
 
-### `npm run build` fails to minify
+  // Assert
+  expect(topLevelHeading).toBeInTheDocument();
+});
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This last step is a bit redundant, since `getByRole` will throw an error (and
+thus fail our test) if the element isn't found, but it's useful to use some kind
+of matcher to complete the story of our test and fully describe the behavior
+we're testing for.
+
+Now that we've written our test, let's run the test suite and verify that our
+tests are failing. Great!
+
+Now all that's left is to update our component so that our tests pass:
+
+```jsx
+function App() {
+  return (
+    <div>
+      <h1>Hi, I'm (your name)</h1>
+    </div>
+  );
+}
+```
+
+## Writing Your Tests
+
+Now that you've seen the TDD workflow in action for testing React components,
+it's time to write your own tests and build out the rest of the features from
+the wireframe:
+
+- An image of yourself with alt text identifying the content of the image
+- A second-level heading with the text `About Me`
+- A paragraph for your biography
+- Two links, one to your GitHub page, and one to your LinkedIn page
+
+When writing your tests, try as much as possible to use accessible queries such
+as `getByRole` or `getByAltText`. You should also use the `toHaveAttribute` Jest
+DOM matcher to check the attributes of some DOM elements, like the `src`
+attribute of an image or the `href` attribute of a link.
+
+## Resources
+
+- [Testing Library - About Queries][query methods]
+- [Jest DOM - Custom Matchers][jest dom]
+- [MDN - ARIA Role Reference][aria role reference]
+
+[aria heading]:
+  https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/heading_role
+[by-role]: https://testing-library.com/docs/queries/byrole/
+[query methods]: https://testing-library.com/docs/queries/about
+[aria role reference]:
+  https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques
+[jest dom]: https://github.com/testing-library/jest-dom#custom-matchers
